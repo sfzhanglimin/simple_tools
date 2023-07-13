@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "images": "^3.2.4",
+    "jimp": "^0.22.7",
+    "plist": "^3.0.6",
+    "tinify": "^1.7.1"
+  }
+}
