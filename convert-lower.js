@@ -31,13 +31,13 @@ function convertFiles(aDirPath, aDirs) {
 function convert(aDir, aFile) {
     if (!!aFile) {
         let file = aFile.toLocaleLowerCase();
+        let newPath = Path.join(aDir, file);
         if (file !== aFile) {
             let filePath = Path.join(aDir, aFile);
-            let newPath = Path.join(aDir, file);
             FS.renameSync(filePath, newPath);
 
-            convertContent(newPath)
         }
+        convertContent(newPath)
     }
     else {
         let sub = aDir.replace(ROOT_DIR, "")
@@ -56,31 +56,37 @@ function convertContent(aFile) {
     switch (extName) {
         /**spine 映射资源变小写 */
         case ".atlas": {
-            writeAble = true;
             content = FS.readFileSync(aFile, "utf8");
             let list = content.split("\n");
             if (list[0] !== "\r") {
-                list[0] = list[0].toLocaleLowerCase();
+                let lower = list[0].toLocaleLowerCase();
+                if (lower !== list[0]) {
+                    list[0] = lower;
+                }
             }
             else {
-                list[1] = list[1].toLocaleLowerCase();
+                let lower = list[1].toLocaleLowerCase();
+                if (lower !== list[1]) {
+                    list[1] = lower;
+                    writeAble = true;
+                }
             }
-            content = list.join("\n");
-
+            if (writeAble) content = list.join("\n");
         }
             break;
         /**plist映射资源变小写 */
         case ".plist": {
-            writeAble = true;
             content = FS.readFileSync(aFile, "utf8");
             let findKey = "<key>realTextureFileName</key>"
             let pos = content.indexOf(findKey);
             if (pos >= 0) {
                 const valuePos = content.indexOf("</string>", pos);
                 let sub = content.substring(pos + findKey.length, valuePos);
-                sub = sub.toLocaleLowerCase();
-
-                content = content.substring(0, pos + findKey.length) + sub + content.substring(valuePos);
+                let lower = sub.toLocaleLowerCase();
+                if (sub !== lower) {
+                    content = content.substring(0, pos + findKey.length) + sub + content.substring(valuePos);
+                    writeAble = true;
+                }
             }
 
 
@@ -89,9 +95,11 @@ function convertContent(aFile) {
             if (pos >= 0) {
                 const valuePos = content.indexOf("</string>", pos);
                 let sub = content.substring(pos + findKey.length, valuePos);
-                sub = sub.toLocaleLowerCase();
-
-                content = content.substring(0, pos + findKey.length) + sub + content.substring(valuePos);
+                let lower = sub.toLocaleLowerCase();
+                if (sub !== lower) {
+                    content = content.substring(0, pos + findKey.length) + sub + content.substring(valuePos);
+                    writeAble = true;
+                }
             }
         }
             break;
