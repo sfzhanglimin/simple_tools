@@ -1,10 +1,9 @@
 const Path = require("path")
 const FS = require("fs")
 
-const ROOT_DIR = "D:\\work\\convert-files\\temp"
+const ROOT_DIR = "D:\\work\\simple_tools\\temp"
 
 function run() {
-    let files = []
     let dirs = []
     convertFiles(ROOT_DIR, dirs)
 
@@ -37,18 +36,7 @@ function convert(aDir, aFile) {
             let newPath = Path.join(aDir, file);
             FS.renameSync(filePath, newPath);
 
-            if (Path.extname(newPath) === ".atlas") {
-                let str = FS.readFileSync(newPath, "utf8");
-                let list = str.split("\n");
-                if (list[0] !== "\r") {
-                    list[0] = list[0].toLocaleLowerCase();
-                }
-                else {
-                    list[1] = list[1].toLocaleLowerCase();
-                }
-                str = list.join("\n");
-                FS.writeFileSync(newPath, str);
-            }
+            convertContent(newPath)
         }
     }
     else {
@@ -58,6 +46,59 @@ function convert(aDir, aFile) {
         if (newFile !== aDir) {
             FS.renameSync(aDir, newFile);
         }
+    }
+}
+
+function convertContent(aFile) {
+    const extName = Path.extname(aFile);
+    let content = null;
+    let writeAble = false;
+    switch (extName) {
+        /**spine 映射资源变小写 */
+        case ".atlas": {
+            writeAble = true;
+            content = FS.readFileSync(aFile, "utf8");
+            let list = content.split("\n");
+            if (list[0] !== "\r") {
+                list[0] = list[0].toLocaleLowerCase();
+            }
+            else {
+                list[1] = list[1].toLocaleLowerCase();
+            }
+            content = list.join("\n");
+
+        }
+            break;
+        /**plist映射资源变小写 */
+        case ".plist": {
+            writeAble = true;
+            content = FS.readFileSync(aFile, "utf8");
+            let findKey = "<key>realTextureFileName</key>"
+            let pos = content.indexOf(findKey);
+            if (pos >= 0) {
+                const valuePos = content.indexOf("</string>", pos);
+                let sub = content.substring(pos + findKey.length, valuePos);
+                sub = sub.toLocaleLowerCase();
+
+                content = content.substring(0, pos + findKey.length) + sub + content.substring(valuePos);
+            }
+
+
+            findKey = "<key>textureFileName</key>"
+            pos = content.indexOf(findKey);
+            if (pos >= 0) {
+                const valuePos = content.indexOf("</string>", pos);
+                let sub = content.substring(pos + findKey.length, valuePos);
+                sub = sub.toLocaleLowerCase();
+
+                content = content.substring(0, pos + findKey.length) + sub + content.substring(valuePos);
+            }
+        }
+            break;
+    }
+
+    if (writeAble && content) {
+        FS.writeFileSync(aFile, content);
     }
 }
 
