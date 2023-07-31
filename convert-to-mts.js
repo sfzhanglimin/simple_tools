@@ -37,19 +37,6 @@ function convert(aDir, aFile) {
                 let newPath = Path.join(aDir, file.replace(".ts",".mts"));
                 FS.renameSync(filePath, newPath);
             }
-
-            // if (Path.extname(newPath) === ".atlas") {
-            //     let str = FS.readFileSync(newPath, "utf8");
-            //     let list = str.split("\n");
-            //     if (list[0] !== "\r") {
-            //         list[0] = list[0].toLocaleLowerCase();
-            //     }
-            //     else {
-            //         list[1] = list[1].toLocaleLowerCase();
-            //     }
-            //     str = list.join("\n");
-            //     FS.writeFileSync(newPath, str);
-            // }
         }
     }
     else {

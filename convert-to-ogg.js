@@ -37,14 +37,6 @@ function convert(aDir, aFile) {
     let file = aFile.toLocaleLowerCase();
     let filePath = Path.join(aDir, aFile);
     let extName = Path.extname(file);
-    // if (file.endsWith(".mp3")) {
-    //     FS.unlinkSync(filePath)
-    // }
-    // else if (file.endsWith(".mp3.meta")) {
-    //     console.log(`relname ${file}`)
-    //     const newName = filePath.replace(".mp3.meta", ".ogg.meta")
-    //     FS.renameSync(filePath, newName)
-    // }    
 
 
     if (extName === ".mp3") {
