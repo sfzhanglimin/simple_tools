@@ -13,7 +13,8 @@ class WebServer {
     socketClient = {};
 
     run() {
-        const server = new WebSocket.Server({ port: 8088, host: "127.0.0.1" })
+        const localIP = this.getLocalIP() ?? "127.0.0.1";
+        const server = new WebSocket.Server({ port: 8088, host: localIP })
         server.on("connection", (wsClient) => {
             console.log('Client connected');
             wsClient.on('message', (message) => {
@@ -131,10 +132,32 @@ class WebServer {
         })
 
 
-        console.log("开始监听8088端口")
+        console.log(`开始监听${localIP}:8088`)
 
 
         // this.client = new Socket.connect()
+    }
+
+
+    getLocalIP() {
+        const os = require('os');
+        const osType = os.type(); //系统类型
+        const ifaces = os.networkInterfaces(); //网络信息
+        let locatIp = '';
+        for (let dev in ifaces) {
+            //console.log(dev)   //打印看结果
+            if (dev === '本地连接' || dev === 'WLAN' || dev === "以太网") {
+                for (let j = 0; j < ifaces[dev].length; j++) {
+                    if (ifaces[dev][j].family === 'IPv4') {
+                        locatIp = ifaces[dev][j].address;
+                        break;
+                    }
+                }
+            }
+        }
+        // console.log(osType)
+        // console.log(locatIp)  //IP地址
+        return locatIp;
     }
 
     readVi(aData) {
