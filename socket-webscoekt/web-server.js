@@ -125,7 +125,9 @@ class WebServer {
 
             });
             wsClient.on('close', () => {
-                this.socketClient[wsClient].client.end();
+                if(this.socketClient[wsClient]){
+                    this.socketClient[wsClient].client.end();
+                }
                 this.socketClient[wsClient] = null;
                 console.log(`on socket close`);
             });
