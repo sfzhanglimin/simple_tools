@@ -28,41 +28,81 @@ class DownloadAssets {
         });
     }
 
-    downLoad(aUrls) {
-        let url = aUrls.pop()
-        if (url) {
-            fetch(url, { method: "get" }).then(response => {
-                if (response.ok) {
-                    const urlInfo = Path.parse(url);
-                    const dirs = url.split("/");
-                    const filepath = url.replace(dirs[0], __dirname)
-                    const dir = Path.dirname(filepath);
-                    if (!FS.existsSync(dir)) {
-                        FS.mkdirSync(dir, { recursive: true });
+    checkRepet(aUrls) {
+        const map = {}
+        for (let i = aUrls.length; i >= 0; i--) {
+            const url = aUrls[i];
+
+            if (map[url]) {
+                aUrls.splice(i, 1)
+            }
+            else {
+                map[url] = true;
+            }
+        }
+    }
+
+    ALL_COUNT = 0
+    D_MAX = 30
+    downLoad(aUrls, aCallback) {
+        if (this.D_MAX > 0) {
+            this.D_MAX--;
+            let url = aUrls.pop()
+            if (url) {
+                const urlInfo = Path.parse(url);
+                const dirs = url.split("/");
+                let filepath = url.replace(dirs[0], __dirname)
+                filepath = Path.normalize(filepath)
+                filepath = filepath.replace(/\\/g,"/")
+                const dir = Path.dirname(filepath);
+
+                if (FS.existsSync(filepath)) {
+                    this.D_MAX++;
+                    this.ALL_COUNT++;
+                    console.log(`已经下载资源:${filepath} count:${this.ALL_COUNT}`)
+                    this.downLoad(aUrls)
+                    return;
+                }
+
+                fetch(url, { method: "get" }).then(response => {
+                    if (response.ok) {
+                        if (!FS.existsSync(dir)) {
+                            FS.mkdirSync(dir, { recursive: true });
+                        }
+
+                        response.buffer().then(aBuffer => {
+                            FS.writeFileSync(filepath, aBuffer)
+                            console.log(`下载资源:${filepath} count:${this.ALL_COUNT}`)
+                            this.ALL_COUNT++;
+                            this.D_MAX++
+                            this.downLoad(aUrls)
+                        })
                     }
+                    else {
+                        this.D_MAX++
+                        aUrls.push(url);
+                        console.log(`下载资源失败:${filepath}`)
+                    }
+                })
 
-                    response.buffer().then(aBuffer => {
-                        FS.writeFileSync(filepath, aBuffer)
-                        console.log(`下载资源:${filepath}`)
+                this.downLoad(aUrls)
+            }
+            else if (aUrls.length > 0) {
+                this.D_MAX++
+                this.downLoad(aUrls)
+            }
+            else {
+                console.log(`下载完成`)
+            }
+        }
 
-                        this.downLoad(aUrls)
-                    })
-                }
-                else {
-                    console.log(`下载资源失败:${filepath}`)
-                }
-            })
-        }
-        else if (aUrls.length > 0) {
-            this.downLoad(aUrls)
-        }
-        else {
-            console.log(`下载完成`)
-        }
+
     }
 
     run() {
         this.readDir(this.assetUrlDir)
+        this.checkRepet(this.urls)
+        this.D_MAX = 30
         this.downLoad(this.urls)
     }
 }
