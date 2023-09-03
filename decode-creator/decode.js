@@ -228,14 +228,14 @@ class Decode {
 
     //0cfd8f700
     parsePackages(aBundle, aKey) {
-        if (aBundle.name === "resources") {
-            debugger
-        }
+        // if (aBundle.name === "resources") {
+        //     debugger
+        // }
         const info = aBundle.getAssetInfo(aKey);
         info.packs.forEach(list => {
             if (typeof (list) === "string") {
                 const subInfo = aBundle.getAssetInfo(list);
-               const url = assetManager.utils.getUrlWithUuid(list)
+                const url = assetManager.utils.getUrlWithUuid(list)
                 console.log("")
             }
             else {
@@ -372,11 +372,17 @@ class Decode {
                         y: info._rect.y,
                         w: info._rect.width,
                         h: info._rect.height,
+                        fx: info._flipX,
+                        fx: info._flipY,
                         rotated: info._rotated
                         // frameInfo.x, frameInfo.y, frameInfo.h, frameInfo.w
                     },
                     outPath: Path.join(dir, info.name) + ".png"
                 })
+
+                if(info._flipX || info._flipY){
+                    debugger
+                }
             }
 
         }
@@ -405,15 +411,22 @@ class Decode {
                     FS.mkdirSync(newDir, { recursive: true });
                 }
 
-                image.extract({ left: frameInfo.x, top: frameInfo.y, height: frameInfo.h, width: frameInfo.w })
+
                 let single_png;
                 if (frameInfo.rotated) {
                     // Handle rotated images
                     // single_png = Images(item, frameInfo.x, frameInfo.y, frameInfo.h, frameInfo.w).rotate(270);
-                    image.rotate(270);
+                    image.rotate(90);
                 } else {
                     // single_png = Images(item, frameInfo.x, frameInfo.y, frameInfo.w, frameInfo.h);
                 }
+
+                
+
+                image.flip(frameInfo.fy)
+                image.flop(frameInfo.fx)
+
+                image.extract({ left: frameInfo.x, top: frameInfo.y, height: frameInfo.h, width: frameInfo.w })
 
                 image.png().toFile(miniPath, () => {
                     this.splitPngForImages(aBuffer, frameList, aCallback);
