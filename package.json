@@ -1,9 +1,9 @@
 {
   "dependencies": {
     "images": "^3.2.4",
-    "jimp": "^0.22.7",
-    "node-fetch": "2.0",
+    "node-fetch": "^2.7.0",
     "plist": "^3.0.6",
+    "sharp": "^0.32.5",
     "tinify": "^1.7.1"
   }
 }

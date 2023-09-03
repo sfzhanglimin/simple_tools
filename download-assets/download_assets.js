@@ -28,12 +28,12 @@ class DownloadAssets {
         });
     }
 
-    checkRepet(aUrls) {
+    checkValid(aUrls) {
         const map = {}
         for (let i = aUrls.length; i >= 0; i--) {
             const url = aUrls[i];
 
-            if (map[url]) {
+            if (!url || map[url] || !Path.extname(url).startsWith(".")) {
                 aUrls.splice(i, 1)
             }
             else {
@@ -51,7 +51,7 @@ class DownloadAssets {
             if (url) {
                 const urlInfo = Path.parse(url);
                 const dirs = url.split("/");
-                let filepath = url.replace(dirs[0], __dirname)
+                let filepath = url.replace(dirs[0], Path.join(__dirname,"temp"))
                 filepath = Path.normalize(filepath)
                 filepath = filepath.replace(/\\/g,"/")
                 const dir = Path.dirname(filepath);
@@ -65,12 +65,11 @@ class DownloadAssets {
                 }
 
                 fetch(url, { method: "get" }).then(response => {
-                    if (response.ok) {
-                        if (!FS.existsSync(dir)) {
-                            FS.mkdirSync(dir, { recursive: true });
-                        }
-
+                    if (response.ok) {                        
                         response.buffer().then(aBuffer => {
+                            if (!FS.existsSync(dir)) {
+                                FS.mkdirSync(dir, { recursive: true });
+                            }
                             FS.writeFileSync(filepath, aBuffer)
                             console.log(`下载资源:${filepath} count:${this.ALL_COUNT}`)
                             this.ALL_COUNT++;
@@ -81,7 +80,7 @@ class DownloadAssets {
                     else {
                         this.D_MAX++
                         aUrls.push(url);
-                        console.log(`下载资源失败:${filepath}`)
+                        console.log(`下载资源失败:${url}`)
                     }
                 })
 
@@ -101,13 +100,13 @@ class DownloadAssets {
 
     run() {
         this.readDir(this.assetUrlDir)
-        this.checkRepet(this.urls)
+        this.checkValid(this.urls)
         this.D_MAX = 30
         this.downLoad(this.urls)
     }
 }
 
 
-new DownloadAssets(Path.join(__dirname, "urls")).run()
+new DownloadAssets(Path.join(__dirname,"temp", "urls")).run()
 
 
