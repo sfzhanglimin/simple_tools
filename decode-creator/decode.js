@@ -43,9 +43,9 @@ const Loader = require("./cocos2d/core/asset-manager/load")
 const assetManager = require("./cocos2d/core/asset-manager/CCAssetManager")
 
 class Decode {
-    _root = Path.join(__dirname, "..", "download-assets", "temp", "static.pgf-asw0zz.com", "63", "assets")
+    _root = Path.join(__dirname, "..", "download-assets", "temp", "static.pgf-asw0zz.com", "68", "assets")
 
-    _baseUrl = "https://static.pgf-asw0zz.com/63/assets"
+    _baseUrl = "https://static.pgf-asw0zz.com/68/assets"
     _interBaseURL = "https://static.pgf-asw0zz.com/shared/0bc343f586/builtins"
     run() {
         // this.reNameAllMd5Name(this._root)
@@ -165,53 +165,98 @@ class Decode {
                                 FS.mkdirSync(dir, { recursive: true })
                             }
                         }
-                        if (aSource instanceof cc.AudioClip) {
-                            FS.writeFileSync(fullPath + aSource._native, aSource._audio)
-                            find = true;
-                        }
-                        else if (aSource instanceof cc.SpriteAtlas) {
-                            this.splist(aSource, fullPath)
-                            next = false;
-                        }
-                        else if (aSource instanceof cc.SpriteFrame) {
-                            const buffers = aSource._texture._image;
-                            FS.writeFileSync(fullPath + aSource._texture._native, buffers)
-                            find = true;
-                        }
-                        else if (aSource instanceof cc.Texture2D) {
-                            find = true;
-                            FS.writeFileSync(fullPath + aSource._native, aSource._image)
-                        }
-                        else if (aSource instanceof cc.Prefab) {
-                            // const data = aSource.data
-                            // debugger
+
+                        switch (aSource?.__classname__) {
+                            case "cc.AudioClip": {
+                                FS.writeFileSync(fullPath + aSource._native, aSource._audio)
+                            }
+                                break;
+                            case "cc.SpriteAtlas": {
+                                this.splist(aSource, fullPath)
+                            }
+                                break;
+                            case "cc.SpriteFrame": {
+                                const buffers = aSource._texture._image;
+                                FS.writeFileSync(fullPath + aSource._texture._native, buffers)
+                            }
+                                break;
+                            case "cc.Texture2D": {
+                                FS.writeFileSync(fullPath + aSource._native, aSource._image)
+                            }
+                                break;
+                            case "cc.Prefab": {
+                                let components = aSource.data.getComponentsInChildren(cc.Sprite)
+                                components.forEach(aSprite => {
+                                    this.parseSpriteFrame(fullPath, aSprite)
+                                });
+
+                                components = aSource.data.getComponents(cc.Sprite)
+                                components.forEach(aSprite => {
+                                    this.parseSpriteFrame(fullPath, aSprite)
+                                });
+
+                                components = aSource.data.getComponentsInChildren(cc.Label)
+                                components.forEach(Label => {
+                                    this.parseFont(fullPath, Label)
+                                });
+
+                                components = aSource.data.getComponents(cc.Label)
+                                components.forEach(Label => {
+                                    this.parseFont(fullPath, Label)
+                                });
+                            }
+                                break;
+                            case "cc.AnimationClip": {
+                                console.log("")
+                            }
+                                break;
+                            case "cc.Asset": {
+                                if (aSource._native !== ".atlas") {
+                                    //FS.writeFileSync(fullPath + aSource._native, aSource._nativeAsset)
+                                    console.log("")
+                                }
+                            }
+                                break;
+                            case "cc.MissingScript": {
+                                if (aSource._skeletonJson) {
+                                    FS.writeFileSync(fullPath + ".json", JSON.stringify(aSource._skeletonJson))
+                                    FS.writeFileSync(fullPath + ".atlas",aSource._atlasText)
+                                }
+                                else{
+                                    console.log("")
+                                }
+                            }
+                                break;
                         }
 
                         /**
-                         *  cc.Texture2D
-                            cc.Prefab
-                            cc.AnimationClip
-                            cc.SpriteAtlas
-                            cc.AudioClip
+                         *  
+                            cc.MissingScript
+                            cc.Asset
                             cc.SpriteFrame
+                            cc.SpriteAtlas
+                            cc.Texture2D
+                            cc.AudioClip
+                            cc.AnimationClip
+                            cc.Prefab
                          */
 
                         console.log(`解析到资源 ${aSource?.__classname__}`)
                     });
 
-                    let used = {}
-                    for (const key in bundle._config.assetInfos._map) {
-                        if (Object.hasOwnProperty.call(bundle._config.assetInfos._map, key)) {
-                            const element = bundle._config.assetInfos._map[key];
-                            if (element.packs) {
-                                const uuid = element.packs[0].uuid
-                                if (!used[uuid]) {
-                                    used[uuid] = true;
-                                    this.parsePackages(bundle, key)
-                                }
-                            }
-                        }
-                    }
+                    // let used = {}
+                    // for (const key in bundle._config.assetInfos._map) {
+                    //     if (Object.hasOwnProperty.call(bundle._config.assetInfos._map, key)) {
+                    //         const element = bundle._config.assetInfos._map[key];
+                    //         if (element.packs) {
+                    //             const uuid = element.packs[0].uuid
+                    //             if (!used[uuid]) {
+                    //                 used[uuid] = true;
+                    //                 this.parsePackages(bundle, key)
+                    //             }
+                    //         }
+                    //     }
+                    // }
                 }
 
                 // if (find) {
@@ -226,11 +271,45 @@ class Decode {
         }
     }
 
+    parseFont(aFullPath, aFont) {
+        if (!aFont.useSystemFont) {
+            console.log("")
+        }
+    }
+
+    parseSpriteFrame(aFullPath, aSprite) {
+        if (aSprite._atlas) {
+            debugger;
+        }
+        else if (aSprite._spriteFrame) {
+            const info = aSprite._spriteFrame;
+            const filePath = Path.join(aFullPath, info.name) + ".png"
+            const infos = []
+            infos.push({
+                frameInfo: {
+                    x: info._rect.x,
+                    y: info._rect.y,
+                    w: info._rect.width,
+                    h: info._rect.height,
+                    fx: info._flipX,
+                    fx: info._flipY,
+                    rotated: info._rotated
+                },
+                outPath: filePath
+            })
+            this.splitPngForImages(info._texture._image, infos)
+            // FS.writeFileSync(filePath, aSprite._spriteFrame._texture._image)
+        }
+        else {
+            console.log("")
+        }
+    }
+
     //0cfd8f700
     parsePackages(aBundle, aKey) {
-        // if (aBundle.name === "resources") {
-        //     debugger
-        // }
+        if (aBundle.name === "resources") {
+            debugger
+        }
         const info = aBundle.getAssetInfo(aKey);
         info.packs.forEach(list => {
             if (typeof (list) === "string") {
@@ -373,15 +452,15 @@ class Decode {
                         w: info._rect.width,
                         h: info._rect.height,
                         fx: info._flipX,
-                        fx: info._flipY,
+                        fy: info._flipY,
                         rotated: info._rotated
                         // frameInfo.x, frameInfo.y, frameInfo.h, frameInfo.w
                     },
                     outPath: Path.join(dir, info.name) + ".png"
                 })
 
-                if(info._flipX || info._flipY){
-                    debugger
+                if (info._flipX || info._flipY) {
+                    //debugger
                 }
             }
 
@@ -412,21 +491,30 @@ class Decode {
                 }
 
 
+
+                if (miniPath.indexOf("any") >= 0) {
+                    console.log("")
+                }
                 let single_png;
                 if (frameInfo.rotated) {
                     // Handle rotated images
                     // single_png = Images(item, frameInfo.x, frameInfo.y, frameInfo.h, frameInfo.w).rotate(270);
-                    image.rotate(90);
+                    image.extract({ left: frameInfo.x, top: frameInfo.y, height: frameInfo.w, width: frameInfo.h })
+                    image.rotate(270);
+                    // image.rotate(180);
                 } else {
+                    image.extract({ left: frameInfo.x, top: frameInfo.y, height: frameInfo.h, width: frameInfo.w })
                     // single_png = Images(item, frameInfo.x, frameInfo.y, frameInfo.w, frameInfo.h);
                 }
+                if (frameInfo.fy)
+                    image.flip(frameInfo.fy)
 
-                
+                if (frameInfo.fx)
+                    image.flop(frameInfo.fx)
 
-                image.flip(frameInfo.fy)
-                image.flop(frameInfo.fx)
 
-                image.extract({ left: frameInfo.x, top: frameInfo.y, height: frameInfo.h, width: frameInfo.w })
+
+
 
                 image.png().toFile(miniPath, () => {
                     this.splitPngForImages(aBuffer, frameList, aCallback);
