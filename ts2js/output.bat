@@ -1,0 +1,2 @@
+tsc --outDir ./output
+pause
