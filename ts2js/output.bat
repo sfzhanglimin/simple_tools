@@ -1,2 +1,2 @@
-tsc --outDir ./output
+call tsc --outDir ./output
 pause
