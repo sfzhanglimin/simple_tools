@@ -1,0 +1,49 @@
+{
+    "317": {
+        "skip": [
+            "/rule",
+            "/fnts"
+        ],
+        "recurse": [
+            "/first-scene"
+        ]
+    },
+    "321": {
+        "skip": [
+            "/rule",
+            "/fnts"
+        ],
+        "recurse": [
+            "/first-scene"
+        ]
+    },
+    "322": {
+        "skip": [],
+        "recurse": [
+            "/first-scene"
+        ]
+    },
+    "259": {
+        "skip": [
+            "/259infos"
+        ],
+        "recurse": [
+            "/first-scene"
+        ]
+    },
+    "289": {
+        "skip": [],
+        "recurse": [
+            "/animations/reelfireactivate",
+            "/animations/winsymbol/bailongwin",
+            "/animations/winsymbol/guiwin",
+            "/animations/winsymbol/longkingwin",
+            "/animations/winsymbol/lotuswin",
+            "/animations/winsymbol/nezhawin",
+            "/animations/winsymbol/qingyuwin"
+        ],
+        "webm_skip": [],
+        "webm_must": [],
+        "all": true
+    }
+}
