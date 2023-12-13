@@ -1,0 +1,1 @@
+script need FBX2glTF tool :https://github.com/godotengine/FBX2glTF/releases
