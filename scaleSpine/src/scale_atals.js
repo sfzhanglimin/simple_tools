@@ -1,13 +1,18 @@
 const Path = require("path");
 const FS = require("fs");
 
+const ScaleImage = require("./scale_image")
+
 function run() {
-    const files = FS.readdirSync(__dirname);
+    const dir = Path.join(__dirname,"..");
+    const files = FS.readdirSync(dir);
     files.forEach(aFile => {
         if (Path.extname(aFile) === ".atlas") {
-            readWrite(Path.join(__dirname, aFile))
+            readWrite(Path.join(dir, aFile))
         }
     });
+
+    ScaleImage();
 }
 
 function readWrite(aFile) {
@@ -51,7 +56,7 @@ function readWrite(aFile) {
         }
     }
     
-    const parent = Path.join(__dirname,"cache")
+    const parent = Path.join(__dirname,"../","cache")
     if(!FS.existsSync(parent)){
         FS.mkdirSync(parent)
     }
