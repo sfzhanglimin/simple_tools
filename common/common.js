@@ -22,6 +22,24 @@ function cleanDir(aDir, aRemoveSelf) {
     }
 }
 
+
+function getFiles(aDir, aFilter, aList) {
+    const list = FS.readdirSync(aDir);
+    const files = aList ?? [];
+    list.forEach(aFileName => {
+        const fullPath = Path.join(aDir, aFileName)
+        if (FS.statSync(fullPath).isDirectory()) {
+            getFiles(fullPath, aFilter, files)
+        }
+        else if(Path.extname(aFileName) === aFilter){
+            files.push(fullPath);
+        }
+    });
+
+    return files;
+}
+
 module.exports = {
-    cleanDir: cleanDir
+    cleanDir: cleanDir,
+    getFiles: getFiles
 }

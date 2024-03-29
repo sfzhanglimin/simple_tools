@@ -210,7 +210,7 @@ class FguiParser {
     _sprites = {}
     _itemsById = {}
     _items = []
-
+    _dependencies = []
     clips = []
 
     loadJtaBuffer(aBuffer) {

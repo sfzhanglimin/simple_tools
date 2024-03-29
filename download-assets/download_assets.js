@@ -49,11 +49,11 @@ class DownloadAssets {
             this.D_MAX--;
             let url = aUrls.pop()
             if (url) {
-                const urlInfo = Path.parse(url);
-                const dirs = url.split("/");
-                let filepath = url.replace(dirs[0], Path.join(__dirname,"temp"))
+                const u = new URL(url);
+
+                let filepath = Path.join(__dirname, "temp", u.hostname, u.pathname)
                 filepath = Path.normalize(filepath)
-                filepath = filepath.replace(/\\/g,"/")
+                filepath = filepath.replace(/\\/g, "/")
                 const dir = Path.dirname(filepath);
 
                 if (FS.existsSync(filepath)) {
@@ -65,7 +65,7 @@ class DownloadAssets {
                 }
 
                 fetch(url, { method: "get" }).then(response => {
-                    if (response.ok) {                        
+                    if (response.ok) {
                         response.buffer().then(aBuffer => {
                             if (!FS.existsSync(dir)) {
                                 FS.mkdirSync(dir, { recursive: true });
@@ -107,6 +107,6 @@ class DownloadAssets {
 }
 
 
-new DownloadAssets(Path.join(__dirname,"temp", "urls")).run()
+new DownloadAssets(Path.join(__dirname, "temp", "urls")).run()
 
 
